@@ -32,7 +32,7 @@ jobs:
 
       - name: Build APK
         run: |
-          cd source
+          cd source/Excalibur
           gradle assembleDebug
 
       - uses: actions/upload-artifact@v4
