@@ -15,6 +15,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare project source
+        run: |
+          test -s Excalibur-source.zip
+          mkdir -p project
+          unzip -q Excalibur-source.zip -d project
+          test -s project/app/build.gradle
+          test -s project/settings.gradle
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
@@ -34,24 +42,18 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Verify Android SDK
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          test -d "$ANDROID_HOME/platforms/android-35"
-          test -d "$ANDROID_HOME/build-tools/35.0.0"
-
       - name: Build debug APK
-        run: gradle --no-daemon --stacktrace clean :app:assembleDebug
+        run: gradle --no-daemon --stacktrace -p project clean :app:assembleDebug
 
       - name: Verify APK
         run: |
-          test -s app/build/outputs/apk/debug/app-debug.apk
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
+          test -s project/app/build/outputs/apk/debug/app-debug.apk
+          ls -lh project/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
           name: Excalibur-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: project/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
